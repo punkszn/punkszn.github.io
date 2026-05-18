@@ -1,79 +1,697 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NFT Viewer</title>
-<style>
-body{
-  margin:0;
-  background:#000;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  font-family:Arial,sans-serif;
-}
-img{
-  max-width:90%;
-  max-height:75vh;
-  border-radius:20px;
-  box-shadow:0 0 30px rgba(255,255,255,.2);
-}
-.buttons{
-  margin-top:20px;
-  display:flex;
-  gap:20px;
-}
-button{
-  padding:14px 30px;
-  border:none;
-  border-radius:999px;
-  font-size:18px;
-  font-weight:bold;
-  color:white;
-  cursor:pointer;
-  transition:.3s;
-}
-#hlBtn{
-  background:linear-gradient(45deg,#00c6ff,#0072ff);
-  box-shadow:0 0 20px #00c6ff;
-}
-#orgBtn{
-  background:linear-gradient(45deg,#ff8a00,#ff0058);
-  box-shadow:0 0 20px #ff0058;
-}
-button:hover{
-  transform:scale(1.08);
-}
-button:active{
-  transform:scale(0.96);
-}
-</style>
-</head>
-<body>
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Art GIF Animator</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pixel:wght@400;700&family=Press+Start+2P&display=swap');
 
-<img id="nftImage" src="">
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-<div class="buttons">
-  <button id="hlBtn" onclick="showImage('hl')">HL</button>
-  <button id="orgBtn" onclick="showImage('org')">ORG</button>
-</div>
+    html, body, #app {
+      height: 100%;
+      width: 100%;
+    }
 
-<script>
-const params = new URLSearchParams(window.location.search);
-const token = params.get('token') || '1';
+    body {
+      font-family: 'Press Start 2P', cursive;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a0033 50%, #0d001a 100%);
+      color: #fff;
+      overflow-x: hidden;
+    }
 
-const BASE = 'https://gateway.pinata.cloud/ipfs/YOUR_CID';
+    #app {
+      overflow-y: auto;
+    }
 
-function showImage(type){
-  document.getElementById('nftImage').src =
-    `${BASE}/${type}/${token}.gif`;
-}
+    .glow-text {
+      text-shadow: 0 0 10px rgba(255, 105, 180, 0.8), 0 0 20px rgba(138, 43, 226, 0.6);
+    }
 
-showImage('hl');
-</script>
+    .sepia-animation {
+      animation: sepiaShift 2s ease-in-out infinite;
+    }
 
-</body>
+    .rainbow-animation {
+      animation: rainbowShift 3s ease-in-out infinite;
+    }
+
+    .sepia-rainbow-animation {
+      animation: sepsiaRainbow 4s ease-in-out infinite;
+    }
+
+    @keyframes sepiaShift {
+      0% { filter: sepia(0%) brightness(1); }
+      50% { filter: sepia(100%) brightness(1.1); }
+      100% { filter: sepia(0%) brightness(1); }
+    }
+
+    @keyframes rainbowShift {
+      0% { filter: hue-rotate(0deg) saturate(1); }
+      25% { filter: hue-rotate(90deg) saturate(1.2); }
+      50% { filter: hue-rotate(180deg) saturate(1.3); }
+      75% { filter: hue-rotate(270deg) saturate(1.2); }
+      100% { filter: hue-rotate(360deg) saturate(1); }
+    }
+
+    @keyframes sepsiaRainbow {
+      0% { filter: sepia(0%) hue-rotate(0deg); }
+      25% { filter: sepia(100%) hue-rotate(90deg); }
+      50% { filter: sepia(50%) hue-rotate(180deg); }
+      75% { filter: sepia(100%) hue-rotate(270deg); }
+      100% { filter: sepia(0%) hue-rotate(360deg); }
+    }
+
+    .upload-zone {
+      border: 3px dashed rgba(255, 105, 180, 0.5);
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(255, 105, 180, 0.05);
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .upload-zone:hover {
+      border-color: rgba(255, 105, 180, 1);
+      background: rgba(255, 105, 180, 0.15);
+      transform: scale(1.02);
+    }
+
+    .upload-zone.dragover {
+      border-color: rgba(138, 43, 226, 1);
+      background: rgba(138, 43, 226, 0.3);
+      transform: scale(1.05);
+    }
+
+    .art-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .art-card {
+      background: rgba(20, 20, 40, 0.8);
+      border: 2px solid rgba(255, 105, 180, 0.5);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .art-card:hover {
+      border-color: rgba(255, 105, 180, 1);
+      transform: translateY(-5px);
+      box-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+    }
+
+    .art-preview {
+      width: 100%;
+      height: 150px;
+      background: #1a1a2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      object-fit: contain;
+      padding: 5px;
+    }
+
+    .art-info {
+      padding: 10px;
+      text-align: center;
+      font-size: 10px;
+      border-top: 1px solid rgba(255, 105, 180, 0.3);
+    }
+
+    .art-name {
+      font-weight: bold;
+      color: rgba(255, 105, 180, 0.8);
+      margin-bottom: 5px;
+    }
+
+    .art-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      justify-content: center;
+    }
+
+    .btn-small {
+      background: rgba(255, 105, 180, 0.6);
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 9px;
+      transition: all 0.2s ease;
+      font-family: 'Press Start 2P', cursive;
+    }
+
+    .btn-small:hover {
+      background: rgba(255, 105, 180, 1);
+      transform: scale(1.05);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff69b4, #ba55d3);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 12px;
+      transition: all 0.3s ease;
+      font-family: 'Press Start 2P', cursive;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #ff1493, #9932cc);
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 105, 180, 0.3);
+      border-top-color: rgba(255, 105, 180, 1);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .controls-panel {
+      background: rgba(20, 20, 40, 0.8);
+      border: 2px solid rgba(255, 105, 180, 0.5);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .download-section {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(138, 43, 226, 0.1);
+      border: 2px solid rgba(138, 43, 226, 0.5);
+      border-radius: 10px;
+    }
+
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .download-btn {
+      background: linear-gradient(135deg, #1abc9c, #16a085);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.2s ease;
+      font-family: 'Press Start 2P', cursive;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .download-btn:hover {
+      background: linear-gradient(135deg, #16a085, #0e6251);
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(26, 188, 156, 0.6);
+    }
+
+    .download-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .animate-preview {
+      width: 100%;
+      height: 200px;
+      background: #1a1a2e;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 15px 0;
+      border: 2px solid rgba(255, 105, 180, 0.3);
+      padding: 10px;
+    }
+
+    .preview-img {
+      max-width: 100%;
+      max-height: 100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .section-title {
+      font-size: 14px;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .stats {
+      font-size: 10px;
+      color: rgba(255, 105, 180, 0.7);
+      margin-top: 10px;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body>
+  <div id="app" class="w-full h-full"><!-- Header -->
+   <header class="bg-gradient-to-r from-purple-900 via-pink-900 to-purple-900 border-b-4 border-pink-500 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-6">
+     <h1 class="text-3xl font-black glow-text mb-2">🎨 PIXEL GIF ANIMATOR</h1>
+     <p class="text-pink-200 text-sm">Sepia + Rainbow Animation Magic ✨</p>
+    </div>
+   </header><!-- Main Content -->
+   <main class="max-w-6xl mx-auto px-6 py-8"><!-- Upload Section -->
+    <section class="mb-12">
+     <h2 class="text-2xl font-bold mb-6 glow-text">📤 UPLOAD PIXEL ART</h2>
+     <div class="upload-zone" id="uploadZone"><i data-lucide="image-plus" style="width: 48px; height: 48px; margin-bottom: 15px; color: rgba(255, 105, 180, 0.8);"></i>
+      <p class="font-bold mb-2" style="font-size: 12px;">Drag &amp; Drop Images or Click</p>
+      <p style="font-size: 10px; color: rgba(255, 200, 200, 0.7);">Single images or multiple files (PNG/JPG)</p><input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+     </div>
+     <p class="stats">Supports single or batch upload • Max file size: 10MB each</p>
+    </section><!-- Animation Preview & Controls -->
+    <section class="mb-12" id="previewSection" style="display: none;">
+     <h2 class="text-2xl font-bold mb-6 glow-text">⚙️ ANIMATION SETTINGS</h2>
+     <div class="controls-panel">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+       <div><label class="block text-sm font-bold text-pink-300 mb-3">Animation Type</label> <select id="animationType" class="w-full bg-gray-900 border-2 border-pink-500/50 rounded px-4 py-2 text-white text-sm" style="font-family: 'Press Start 2P', cursive;"> <option value="sepia">🟠 SEPIA ONLY</option> <option value="rainbow">🌈 RAINBOW ONLY</option> <option value="sepia-rainbow" selected>✨ SEPIA + RAINBOW</option> </select>
+       </div>
+       <div><label class="block text-sm font-bold text-pink-300 mb-3">Frame Duration (ms)</label> <input type="number" id="frameDuration" value="300" min="50" max="2000" step="50" class="w-full bg-gray-900 border-2 border-pink-500/50 rounded px-4 py-2 text-white text-sm" style="font-family: monospace;">
+       </div>
+       <div><label class="block text-sm font-bold text-pink-300 mb-3">Animation Loops</label> <select id="loopCount" class="w-full bg-gray-900 border-2 border-pink-500/50 rounded px-4 py-2 text-white text-sm" style="font-family: monospace;"> <option value="0" selected>Infinite</option> <option value="1">1 Loop</option> <option value="2">2 Loops</option> <option value="3">3 Loops</option> </select>
+       </div>
+      </div>
+      <div class="mt-6"><label class="flex items-center gap-3 cursor-pointer"> <input type="checkbox" id="upscaleOption" checked class="w-4 h-4"> <span class="text-sm font-bold text-pink-300">🔍 Upscale Pixel Art (2x)</span> </label>
+      </div>
+     </div><!-- Live Preview -->
+     <div style="margin-top: 20px;">
+      <p class="text-sm font-bold text-pink-300 mb-3">LIVE PREVIEW</p>
+      <div id="selectedPreview" class="animate-preview"><img id="previewImg" class="preview-img" alt="Preview">
+      </div>
+     </div>
+    </section><!-- Images Grid -->
+    <section class="mb-12" id="imagesSection" style="display: none;">
+     <h2 class="text-2xl font-bold mb-6 glow-text">🖼️ YOUR IMAGES</h2>
+     <div id="artGrid" class="art-grid"></div>
+     <p class="stats mt-4">Total images: <span id="imageCount">0</span></p>
+    </section><!-- Action Buttons -->
+    <section class="mb-12" id="actionsSection" style="display: none;">
+     <div class="flex flex-col md:flex-row gap-4"><button id="createAllBtn" class="btn-primary flex-1"> <i data-lucide="sparkles" style="width: 16px; height: 16px; display: inline-block; margin-right: 8px;"></i> Create All GIFs </button> <button id="clearAllBtn" class="btn-primary flex-1" style="background: linear-gradient(135deg, #e74c3c, #c0392b);"> <i data-lucide="trash-2" style="width: 16px; height: 16px; display: inline-block; margin-right: 8px;"></i> Clear All </button>
+     </div>
+    </section><!-- Download Section -->
+    <section id="downloadSection" class="download-section" style="display: none;">
+     <h2 class="text-2xl font-bold mb-6 glow-text">⬇️ DOWNLOAD GIFs</h2>
+     <p class="text-sm text-pink-200 mb-4">Click any GIF to download individually, or use "Download All" to batch download</p><button id="downloadAllBtn" class="w-full btn-primary mb-6" style="background: linear-gradient(135deg, #f39c12, #e67e22);"> <i data-lucide="download" style="width: 16px; height: 16px; display: inline-block; margin-right: 8px;"></i> DOWNLOAD ALL GIFs (ZIP) </button>
+     <div id="downloadGrid" class="download-grid"></div>
+    </section>
+   </main>
+  </div>
+  <script>
+    // Element SDK Init
+    const defaultConfig = {
+      animation_speed: "300"
+    };
+
+    let config = { ...defaultConfig };
+
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange: async (newConfig) => {
+        config = { ...config, ...newConfig };
+        document.getElementById('frameDuration').value = config.animation_speed;
+      },
+      mapToCapabilities: () => ({
+        recolorables: [],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      }),
+      mapToEditPanelValues: () => new Map([
+        ["animation_speed", config.animation_speed]
+      ])
+    });
+
+    let artworks = [];
+    let createdGifs = [];
+
+    // Upload handling
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+    });
+
+    function handleFiles(files) {
+      artworks = [];
+      createdGifs = [];
+      let loadedCount = 0;
+
+      Array.from(files).forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          artworks.push({
+            id: index,
+            name: file.name.replace(/\.[^/.]+$/, ""),
+            data: e.target.result,
+            originalFile: file
+          });
+          
+          loadedCount++;
+          if (loadedCount === files.length) {
+            showUI();
+            displayArtworks();
+            lucide.createIcons();
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function showUI() {
+      document.getElementById('previewSection').style.display = 'block';
+      document.getElementById('imagesSection').style.display = 'block';
+      document.getElementById('actionsSection').style.display = 'block';
+      if (createdGifs.length > 0) {
+        document.getElementById('downloadSection').style.display = 'block';
+      }
+    }
+
+    function displayArtworks() {
+      const grid = document.getElementById('artGrid');
+      document.getElementById('imageCount').textContent = artworks.length;
+
+      grid.innerHTML = artworks.map(art => `
+        <div class="art-card" id="card-${art.id}">
+          <img src="${art.data}" class="art-preview" alt="${art.name}">
+          <div class="art-info">
+            <div class="art-name" style="font-size: 10px; word-break: break-all;">${art.name}</div>
+            <div class="art-actions">
+              <button class="btn-small" onclick="createGif(${art.id})">ANIMATE</button>
+              <button class="btn-small" style="background: rgba(231, 76, 60, 0.6);" onclick="removeArt(${art.id})">DELETE</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      if (artworks.length > 0) {
+        document.getElementById('previewImg').src = artworks[0].data;
+      }
+
+      lucide.createIcons();
+    }
+
+    function removeArt(id) {
+      artworks = artworks.filter(a => a.id !== id);
+      createdGifs = createdGifs.filter(g => g.id !== id);
+      displayArtworks();
+      
+      if (artworks.length === 0) {
+        document.getElementById('previewSection').style.display = 'none';
+        document.getElementById('imagesSection').style.display = 'none';
+        document.getElementById('actionsSection').style.display = 'none';
+        document.getElementById('downloadSection').style.display = 'none';
+      }
+    }
+
+    async function createGif(artId) {
+      const artwork = artworks.find(a => a.id === artId);
+      if (!artwork) return;
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<div class="loading-spinner" style="display: inline-block; width: 14px; height: 14px; margin-right: 4px;"></div>...';
+
+      const animType = document.getElementById('animationType').value;
+      const frameDuration = parseInt(document.getElementById('frameDuration').value);
+      const loopCount = parseInt(document.getElementById('loopCount').value);
+      const upscale = document.getElementById('upscaleOption').checked;
+
+      try {
+        // Create canvas with image
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const scale = upscale ? 2 : 1;
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          const ctx = canvas.getContext('2d');
+          
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          // Create gif
+          const gif = new GIF({
+            workers: 2,
+            quality: 10,
+            width: canvas.width,
+            height: canvas.height,
+            workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js'
+          });
+
+          // Add frames with different filters
+          const frameCount = 6;
+          for (let i = 0; i < frameCount; i++) {
+            const frameCanvas = document.createElement('canvas');
+            frameCanvas.width = canvas.width;
+            frameCanvas.height = canvas.height;
+            const frameCtx = frameCanvas.getContext('2d');
+
+            // Apply filter based on frame
+            const progress = i / frameCount;
+            if (animType === 'sepia') {
+              const sepia = progress > 0.5 ? 100 - (progress - 0.5) * 200 : progress * 200;
+              frameCtx.filter = `sepia(${sepia}%) brightness(${1 + (0.1 * Math.sin(progress * Math.PI * 2))})`;
+            } else if (animType === 'rainbow') {
+              const hue = (progress * 360) % 360;
+              frameCtx.filter = `hue-rotate(${hue}deg) saturate(1.3)`;
+            } else {
+              const sepia = (progress > 0.5 ? 100 - (progress - 0.5) * 200 : progress * 200);
+              const hue = (progress * 360) % 360;
+              frameCtx.filter = `sepia(${sepia}%) hue-rotate(${hue}deg)`;
+            }
+
+            frameCtx.drawImage(canvas, 0, 0);
+            gif.addFrame(frameCanvas, { delay: frameDuration });
+          }
+
+          gif.on('finished', function(blob) {
+            createdGifs.push({
+              id: artId,
+              name: artwork.name,
+              blob: blob,
+              url: URL.createObjectURL(blob)
+            });
+
+            displayDownloads();
+            btn.disabled = false;
+            btn.innerHTML = '✅ DONE';
+            setTimeout(() => {
+              btn.innerHTML = 'ANIMATE';
+            }, 2000);
+
+            lucide.createIcons();
+          });
+
+          gif.render();
+        };
+        img.src = artwork.data;
+      } catch (err) {
+        console.error('GIF creation error:', err);
+        btn.disabled = false;
+        btn.innerHTML = '⚠️ ERROR';
+      }
+    }
+
+    async function createAllGifs() {
+      const btn = document.getElementById('createAllBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="loading-spinner" style="display: inline-block;"></div> Creating...';
+
+      for (let i = 0; i < artworks.length; i++) {
+        await new Promise(resolve => {
+          const artwork = artworks[i];
+          
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const scale = document.getElementById('upscaleOption').checked ? 2 : 1;
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            const gif = new GIF({
+              workers: 2,
+              quality: 10,
+              width: canvas.width,
+              height: canvas.height,
+              workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js'
+            });
+
+            const animType = document.getElementById('animationType').value;
+            const frameDuration = parseInt(document.getElementById('frameDuration').value);
+            const frameCount = 6;
+
+            for (let j = 0; j < frameCount; j++) {
+              const frameCanvas = document.createElement('canvas');
+              frameCanvas.width = canvas.width;
+              frameCanvas.height = canvas.height;
+              const frameCtx = frameCanvas.getContext('2d');
+
+              const progress = j / frameCount;
+              if (animType === 'sepia') {
+                const sepia = progress > 0.5 ? 100 - (progress - 0.5) * 200 : progress * 200;
+                frameCtx.filter = `sepia(${sepia}%) brightness(${1 + (0.1 * Math.sin(progress * Math.PI * 2))})`;
+              } else if (animType === 'rainbow') {
+                const hue = (progress * 360) % 360;
+                frameCtx.filter = `hue-rotate(${hue}deg) saturate(1.3)`;
+              } else {
+                const sepia = (progress > 0.5 ? 100 - (progress - 0.5) * 200 : progress * 200);
+                const hue = (progress * 360) % 360;
+                frameCtx.filter = `sepia(${sepia}%) hue-rotate(${hue}deg)`;
+              }
+
+              frameCtx.drawImage(canvas, 0, 0);
+              gif.addFrame(frameCanvas, { delay: frameDuration });
+            }
+
+            gif.on('finished', function(blob) {
+              if (!createdGifs.find(g => g.id === artwork.id)) {
+                createdGifs.push({
+                  id: artwork.id,
+                  name: artwork.name,
+                  blob: blob,
+                  url: URL.createObjectURL(blob)
+                });
+              }
+              resolve();
+            });
+
+            gif.render();
+          };
+          img.src = artwork.data;
+        });
+
+        btn.innerHTML = `<div class="loading-spinner" style="display: inline-block;"></div> ${i + 1}/${artworks.length}`;
+      }
+
+      displayDownloads();
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="sparkles" style="width: 16px; height: 16px; display: inline-block; margin-right: 8px;"></i> Create All GIFs';
+      lucide.createIcons();
+    }
+
+    function displayDownloads() {
+      document.getElementById('downloadSection').style.display = 'block';
+      const grid = document.getElementById('downloadGrid');
+
+      grid.innerHTML = createdGifs.map(gif => `
+        <button class="download-btn" onclick="downloadGif('${gif.name}', '${gif.url}')" title="${gif.name}">
+          ⬇️ ${gif.name}
+        </button>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function downloadGif(name, url) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${name}_animated.gif`;
+      a.click();
+    }
+
+    document.getElementById('createAllBtn').addEventListener('click', createAllGifs);
+
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+      artworks = [];
+      createdGifs = [];
+      document.getElementById('fileInput').value = '';
+      document.getElementById('previewSection').style.display = 'none';
+      document.getElementById('imagesSection').style.display = 'none';
+      document.getElementById('actionsSection').style.display = 'none';
+      document.getElementById('downloadSection').style.display = 'none';
+    });
+
+    document.getElementById('downloadAllBtn').addEventListener('click', async () => {
+      if (createdGifs.length === 0) return;
+
+      const btn = document.getElementById('downloadAllBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="loading-spinner" style="display: inline-block;"></div> Preparing ZIP...';
+
+      // Note: For full ZIP support, you'd need a library like jszip
+      // For now, trigger individual downloads
+      for (const gif of createdGifs) {
+        setTimeout(() => downloadGif(gif.name, gif.url), 200);
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="download"></i> DOWNLOAD ALL GIFs (ZIP)';
+      lucide.createIcons();
+    });
+
+    lucide.createIcons();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fd950e957c53e6f',t:'MTc3OTA5MTA5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
