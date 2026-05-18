@@ -63,22 +63,16 @@ button:active{
 
 <script>
 const params = new URLSearchParams(window.location.search);
-const token = params.get("token") || "1";
+const token = params.get('token') || '1';
 
-// viewer.html যে URL থেকে লোড হয়েছে, সেখান থেকে CID বের করা
-const match = window.location.href.match(/\/ipfs\/([^/?#]+)/);
-const cid = match ? match[1] : "";
+const BASE = 'https://gateway.pinata.cloud/ipfs/YOUR_CID';
 
-// একই CID ব্যবহার করে assets লোড করা
-const BASE = `https://ipfs.io/ipfs/${cid}`;
-
-function showImage(type) {
-  document.getElementById("nftImage").src =
+function showImage(type){
+  document.getElementById('nftImage').src =
     `${BASE}/${type}/${token}.gif`;
 }
 
-// Default image
-showImage("hl");
+showImage('hl');
 </script>
 
 </body>
