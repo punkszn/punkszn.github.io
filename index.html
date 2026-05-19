@@ -1,491 +1,649 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>CryptoPunks NFT মেটাডাটা ভিউয়ার ও ডাউনলোডার</title>
+    <title>NFT JSON Generator - Create NFTs with Attributes</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         }
+
         body {
-            background: linear-gradient(135deg, #0b1120 0%, #19233c 100%);
-            color: #eef2ff;
-            padding: 20px;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             min-height: 100vh;
+            padding: 2rem 1.5rem;
         }
+
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
-        h1 {
-            font-size: 2rem;
+
+        /* Header */
+        .header {
             text-align: center;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #ffd966, #ff9966);
+            margin-bottom: 2.5rem;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(135deg, #a855f7, #ec4899, #fbbf24);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            font-weight: 800;
+            letter-spacing: -1px;
         }
-        .sub {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: #a5b4fc;
+
+        .header p {
+            color: #c4b5fd;
+            margin-top: 0.75rem;
+            font-size: 1.1rem;
         }
-        .controls {
-            background: rgba(15, 25, 45, 0.7);
-            backdrop-filter: blur(8px);
-            border-radius: 32px;
-            padding: 1.2rem 1.5rem;
-            margin-bottom: 2rem;
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(30, 27, 58, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.5);
+            padding: 1.8rem;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+        }
+
+        .card h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #f0e7ff;
+            border-left: 5px solid #c084fc;
+            padding-left: 1rem;
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #e9d5ff;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: #1e1b3e;
+            border: 2px solid #4c1d95;
+            border-radius: 1rem;
+            font-size: 0.95rem;
+            color: #f3e8ff;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #c084fc;
+            box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Attributes Section */
+        .attributes-section {
+            background: #1a1736;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .attribute-item {
+            background: #2d2a55;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .attribute-item input {
+            flex: 1;
+            min-width: 120px;
+            background: #1e1b3e;
+        }
+
+        .remove-attr-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .remove-attr-btn:hover {
+            background: #b91c1c;
+        }
+
+        .add-attr-btn {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: 0.2s;
+        }
+
+        .add-attr-btn:hover {
+            transform: scale(1.02);
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        }
+
+        /* Buttons */
+        .btn-group {
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid rgba(255,255,255,0.15);
+            margin: 1.5rem 0 1rem;
         }
-        .search-box {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .search-box input {
-            padding: 10px 16px;
-            border-radius: 40px;
+
+        .btn {
+            padding: 0.75rem 1.5rem;
             border: none;
-            background: #0f172a;
-            color: white;
-            font-size: 1rem;
-            width: 180px;
-            border: 1px solid #334155;
-        }
-        .search-box button, .download-all {
-            background: #3b82f6;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-            color: white;
+            border-radius: 3rem;
+            font-weight: 700;
             font-size: 0.9rem;
-        }
-        .search-box button:hover, .download-all:hover {
-            background: #2563eb;
-            transform: scale(0.97);
-        }
-        .download-all {
-            background: #10b981;
-        }
-        .info-text {
-            background: #1e293b;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-size: 0.85rem;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-        .card {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(4px);
-            border-radius: 24px;
-            padding: 1rem;
-            transition: all 0.2s;
-            border: 1px solid rgba(255,255,255,0.1);
             cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
         }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 30px -12px rgba(0,0,0,0.5);
-            border-color: #fbbf24;
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
         }
-        .punk-img {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            background: #0f172a;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            font-weight: bold;
-            color: #94a3b8;
-            margin-bottom: 12px;
-            overflow: hidden;
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.5);
         }
-        .punk-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 20px;
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
         }
-        .punk-id {
-            font-size: 1.3rem;
-            font-weight: bold;
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #1e1b3e;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #c084fc;
+            color: #c084fc;
+        }
+
+        /* Preview */
+        .preview-area {
+            background: #0f0c29;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border: 1px solid #4c1d95;
+        }
+
+        .json-preview {
+            background: #05030f;
+            color: #a5f3c3;
+            padding: 1rem;
+            border-radius: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 280px;
+        }
+
+        /* Batch List */
+        .batch-list {
+            max-height: 280px;
+            overflow-y: auto;
+            margin-top: 1rem;
+            background: #0f0c29;
+            border-radius: 1rem;
+            padding: 0.5rem;
+        }
+
+        .file-item {
+            background: #2d2a55;
+            margin: 0.5rem 0;
+            padding: 0.6rem 1rem;
+            border-radius: 2rem;
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
+            align-items: center;
+            font-size: 0.8rem;
         }
+
         .badge {
-            background: #f59e0b;
-            padding: 4px 10px;
-            border-radius: 30px;
+            background: #8b5cf6;
+            color: white;
+            padding: 0.2rem 0.7rem;
+            border-radius: 2rem;
             font-size: 0.7rem;
             font-weight: bold;
         }
-        .meta-row {
-            font-size: 0.8rem;
-            margin-top: 8px;
-            color: #cbd5e1;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            justify-content: space-between;
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            body {
+                padding: 1rem;
+            }
         }
-        .attr {
-            background: #0f172a;
-            padding: 4px 8px;
-            border-radius: 20px;
-        }
-        .download-btn {
-            margin-top: 12px;
-            width: 100%;
-            background: #334155;
-            border: none;
-            padding: 8px;
-            border-radius: 40px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .download-btn:hover {
-            background: #3b82f6;
-        }
-        .loader {
-            text-align: center;
-            padding: 3rem;
-            font-size: 1.2rem;
-        }
+
         footer {
-            margin-top: 3rem;
             text-align: center;
-            font-size: 0.75rem;
-            opacity: 0.7;
-        }
-        @media (max-width: 640px) {
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .search-box {
-                justify-content: center;
-            }
+            margin-top: 2.5rem;
+            color: #a78bfa;
+            font-size: 0.8rem;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🗿 CryptoPunks NFT মেটাডাটা এক্সপ্লোরার</h1>
-    <div class="sub">সমস্ত 10,000 পাংক + মেটাডাটা | সিরিয়াল অনুযায়ী ডাউনলোড করুন</div>
-
-    <div class="controls">
-        <div class="search-box">
-            <input type="number" id="serialInput" placeholder="পাংক # (0-9999)" min="0" max="9999">
-            <button id="searchBtn">🔍 দেখুন</button>
-            <button id="resetBtn">✨ সব দেখান</button>
-        </div>
-        <div class="download-all">
-            📥 সমস্ত মেটাডাটা ডাউনলোড (JSON)
-        </div>
-        <div class="info-text">
-            🧠 ডাটা: CryptoPunks V1 (অফিসিয়াল মেটাডাটা অনুকরণ) • মোট: <span id="totalCount">0</span>
-        </div>
+    <div class="header">
+        <h1>🖼️ NFT JSON Studio</h1>
+        <p>Create NFT metadata | Add Name, Description, Image CID/Link & Multiple Attributes (Traits)</p>
     </div>
 
-    <div id="punkGrid" class="grid">
-        <div class="loader">⏳ লোড হচ্ছে পাংক কালেকশন...</div>
+    <div class="main-grid">
+        <!-- LEFT PANEL: NFT Data Form -->
+        <div class="card">
+            <h2>✏️ NFT Details</h2>
+            <div class="form-group">
+                <label>🏷️ NFT Name</label>
+                <input type="text" id="nftName" placeholder="e.g., Cosmic Ape #442" value="Galactic Phoenix">
+            </div>
+            <div class="form-group">
+                <label>📝 Description</label>
+                <textarea id="nftDescription" placeholder="Describe your NFT...">A rare cosmic creature from the Andromeda galaxy, radiating mystical energy.</textarea>
+            </div>
+            <div class="form-group">
+                <label>🖼️ Image CID / URL</label>
+                <input type="text" id="imageUrl" placeholder="IPFS CID: Qm... or https://..." value="QmXk8kZ1nRcqN9rQV4z8bBzfLwX5G6f3jYpF6hRk9aGtL">
+            </div>
+
+            <!-- Attributes Section -->
+            <div class="attributes-section">
+                <label style="margin-bottom: 0.8rem;">✨ Attributes (Traits) — Add multiple</label>
+                <div id="attributesContainer">
+                    <!-- Dynamic attribute rows will appear here -->
+                </div>
+                <button type="button" class="add-attr-btn" id="addAttributeBtn">+ Add New Attribute</button>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="singleDownloadBtn">⭐ Download Single NFT JSON</button>
+                <button class="btn btn-outline" id="resetFormBtn">⟳ Reset Form</button>
+            </div>
+
+            <div class="preview-area">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <strong>🔍 Live JSON Preview</strong>
+                    <span class="badge">Current NFT</span>
+                </div>
+                <div class="json-preview" id="jsonPreview">Loading preview...</div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: Batch Generate 500 Files -->
+        <div class="card">
+            <h2>⚙️ Batch Generator (500 NFTs)</h2>
+            <p style="color:#c4b5fd; margin-bottom: 1rem;">Generate up to 500 unique JSON files. Each file will have incremental variations in Name, Image CID, Description & Attributes.</p>
+            
+            <div class="form-group">
+                <label>🔢 Number of NFTs to Generate (max 500)</label>
+                <input type="number" id="batchCount" min="1" max="500" value="500" step="1">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-success" id="generateBatchBtn">📦 Generate Batch (ZIP)</button>
+                <button class="btn btn-warning" id="clearBatchListBtn">🗑️ Clear List</button>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <strong>📋 Generated Files List</strong>
+                <div id="batchFileList" class="batch-list">
+                    <div style="color:#a78bfa; text-align:center; padding:1rem;">No files generated yet</div>
+                </div>
+                <button id="downloadAllZipBtn" class="btn btn-primary" style="background: #ec4899; width:100%; margin-top: 1rem;">📥 Download All as ZIP</button>
+            </div>
+        </div>
     </div>
-    <footer>⚡ প্রতিটি কার্ডে মেটাডাটা সহ ডাউনলোড বাটন | সিরিয়াল অনুযায়ী পৃথক ডাউনলোড সম্ভব | ⚡ CryptoPunks致敬</footer>
+    <footer>
+        🚀 Full NFT metadata schema: name, description, image, attributes (trait_type & value). Each JSON ready for NFT marketplaces.
+    </footer>
 </div>
 
+<!-- JS Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <script>
-    // ------------------------------
-    // CryptoPunks সম্পূর্ণ জেনেরিক মেটাডাটা তৈরি (0 থেকে 9999)
-    // বাস্তব punk数据 সিমুলেটেড, তবে প্রতিটি punks এর unique attributes আছে।
-    // আমরা অফিসিয়াল punks metadata 구조 অনুসরণ করছি (name, image, attributes)
-    // ------------------------------
+    (function() {
+        // DOM Elements
+        const nftNameInput = document.getElementById('nftName');
+        const nftDescInput = document.getElementById('nftDescription');
+        const imageUrlInput = document.getElementById('imageUrl');
+        const attributesContainer = document.getElementById('attributesContainer');
+        const addAttributeBtn = document.getElementById('addAttributeBtn');
+        const jsonPreviewDiv = document.getElementById('jsonPreview');
+        const singleDownloadBtn = document.getElementById('singleDownloadBtn');
+        const resetFormBtn = document.getElementById('resetFormBtn');
+        const generateBatchBtn = document.getElementById('generateBatchBtn');
+        const clearBatchListBtn = document.getElementById('clearBatchListBtn');
+        const downloadAllZipBtn = document.getElementById('downloadAllZipBtn');
+        const batchFileListDiv = document.getElementById('batchFileList');
+        const batchCountInput = document.getElementById('batchCount');
 
-    const TOTAL_PUNKS = 10000;
+        // Store generated files for batch
+        let generatedFiles = []; // each: { filename, jsonObject }
 
-    // প্রি-ডিফাইন্ড ট্রেইটস (realistic traits from CryptoPunks)
-    const accessoryList = ["Knitted Cap", "Beanie", "Cap Forward", "Cap", "Cowboy Hat", "Fedora", "Hoodie", "Headlamp", "Pilot Helmet", "Vampire Hair", "Wild Hair", "Straight Hair", "Stringy Hair", "Dark Hair", "Blonde Bob", "Crazy Hair", "Pigtails", "Tiara", "Earring", "Smile", "Mustache", "Goat", "Front Beard", "Big Beard", "Normal Beard", "Chinstrap", "Cigarette", "Pipe", "Vape", "Clown Eyes Blue", "Clown Eyes Green", "Nerd Glasses", "Regular Shades", "Horned Rim Glasses", "Big Shades", "3D Glasses", "Eye Mask", "Mask", "Medical Mask", "Mole", "Buck Teeth", "Frown", "Male", "Female"];
-    const typeList = ["Male", "Female", "Zombie", "Ape", "Alien"];
-    const skinList = ["Light Skin", "Dark Skin", "Pale", "Olive"];
-    const hairColors = ["Black", "Brown", "Blonde", "Red", "Gray", "White", "Green", "Purple", "Pink", "Orange"];
+        // Attribute Management
+        let attributeCounter = 0;
 
-    function getRandomItem(arr) {
-        return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    // নির্দিষ্ট punk index এর জন্য metadata generate (deterministic but varied by index)
-    // প্রতিটি punk এর জন্য consistent metadata তৈরি করতে index + seed ব্যবহার করছি
-    function generatePunkMetadata(punkId) {
-        // seed ascii based on index
-        const seed = punkId * 9973;
-        const r = (max) => (Math.sin(seed + max) * 10000) % max;
-        function detChoice(arr, offset) {
-            let idx = Math.floor(Math.abs(Math.sin(seed + offset) * 100000) % arr.length);
-            return arr[idx];
-        }
-
-        // বিশেষ rare টাইপ (Zombie, Ape, Alien) নির্ধারণ
-        let punkType = "Male";
-        const rareRand = Math.abs(Math.sin(seed) * 100) % 100;
-        if (rareRand < 2) punkType = "Alien";      // 2% alien
-        else if (rareRand < 5) punkType = "Ape";    // 3% ape
-        else if (rareRand < 9) punkType = "Zombie"; // 4% zombie
-        else {
-            punkType = (punkId % 2 === 0) ? "Male" : "Female";
-        }
-
-        let attributes = [];
-        // Type attribute
-        attributes.push({ trait_type: "Type", value: punkType });
-        
-        // accessories/headgear count 0-2 pieces
-        let hasAccessory = (Math.abs(Math.sin(seed + 10)) > 0.3);
-        if (hasAccessory) {
-            let acc = detChoice(accessoryList, 42);
-            attributes.push({ trait_type: "Accessory", value: acc });
-        }
-        // Hair (except bald)
-        let hasHair = (Math.abs(Math.sin(seed + 22)) > 0.2);
-        if (hasHair && punkType !== "Alien") {
-            let hair = detChoice(hairColors, 87);
-            attributes.push({ trait_type: "Hair", value: hair });
-        } else if (punkType === "Alien") {
-            attributes.push({ trait_type: "Hair", value: "None (Alien)" });
-        }
-        // Eyes
-        let eyeStyle = detChoice(["Normal", "Clown Eyes Blue", "Clown Eyes Green", "Nerd Glasses", "Regular Shades", "Big Shades", "3D Glasses", "Eye Mask"], 111);
-        attributes.push({ trait_type: "Eyes", value: eyeStyle });
-        
-        // Mouth
-        let mouthVal = detChoice(["Smile", "Frown", "Buck Teeth", "Cigarette", "Pipe", "Vape", "Neutral"], 211);
-        attributes.push({ trait_type: "Mouth", value: mouthVal });
-        
-        // Facial hair / beard
-        if (punkType === "Male" && Math.abs(Math.sin(seed + 75)) > 0.6) {
-            let beard = detChoice(["Goat", "Front Beard", "Big Beard", "Normal Beard", "Chinstrap"], 311);
-            attributes.push({ trait_type: "Beard", value: beard });
-        }
-        
-        // Earring or accessory
-        if (Math.abs(Math.sin(seed + 420)) > 0.7) {
-            attributes.push({ trait_type: "Earring", value: "Silver Earring" });
-        }
-        
-        // Skin Tone (if human)
-        if (punkType === "Male" || punkType === "Female") {
-            let skin = detChoice(skinList, 777);
-            attributes.push({ trait_type: "Skin", value: skin });
-        } else if (punkType === "Zombie") {
-            attributes.push({ trait_type: "Skin", value: "Green Decayed" });
-        } else if (punkType === "Ape") {
-            attributes.push({ trait_type: "Skin", value: "Brown Fur" });
-        } else if (punkType === "Alien") {
-            attributes.push({ trait_type: "Skin", value: "Blue Grey" });
-        }
-        
-        // প্রতিটি punks এর জন্য image url (CryptoPunks off-chain hosted simulation)
-        // বাস্তব image না থাকলেও একটি placeholder ক্রিয়েট করুন, কিন্তু অনেক NFT site মত আমরা একটি SVG তৈরি করবো যা index অনুযায়ী কালারফুল
-        // কিন্তু এটা ভালো ইউজার এক্সপেরিয়েন্সের জন্য একটি canvas style avatar প্রদর্শন করবো।
-        // প্রকৃত punk image না, কিন্তু metadata দেখানোর জন্য কাল্পনিক।
-        const imageUrl = `https://robohash.org/${punkId}?set=set3&size=200x200`;  // creative generic avatar, punk ভাবনা
-        // তবে crypto punk থিমে আমরা একটি ডেডিকেটেড জেনারেটেড ইমেজ ব্যবহার করতে পারি ডেমো হিসেবে
-        
-        const punkName = `CryptoPunk #${punkId}`;
-        
-        return {
-            name: punkName,
-            description: `Official CryptoPunk #${punkId}. One of 10,000 unique collectible punks on Ethereum.`,
-            image: imageUrl,
-            external_url: `https://www.larvalabs.com/cryptopunks/details/${punkId}`,
-            attributes: attributes,
-            id: punkId
-        };
-    }
-
-    // সব punk metadata cache
-    let allPunksMetadata = [];
-    function buildFullCollection() {
-        console.log("Generating all 10000 punks metadata (synthetic realistic)...");
-        // ধীরে ধীরে generate করতে পারে, কিন্তু async তে UI ব্লক না করে chunk এ করা ভাল।
-        // কিন্তু 10000 টি অপেক্ষাকৃত দ্রুত তৈরি হয়। তবুও progressive loading
-        allPunksMetadata = [];
-        for (let i = 0; i < TOTAL_PUNKS; i++) {
-            allPunksMetadata.push(generatePunkMetadata(i));
-        }
-        document.getElementById("totalCount").innerText = TOTAL_PUNKS;
-        renderPunks(allPunksMetadata);
-    }
-
-    function renderPunks(punksArray) {
-        const grid = document.getElementById("punkGrid");
-        if (!punksArray.length) {
-            grid.innerHTML = `<div class="loader">😢 কোন পাংক খুঁজে পাওয়া যায়নি</div>`;
-            return;
-        }
-        grid.innerHTML = "";
-        punksArray.forEach(punk => {
-            const card = document.createElement("div");
-            card.className = "card";
-            // attributes display shorten
-            const topAttrs = punk.attributes.slice(0, 4);
-            const attrHtml = topAttrs.map(attr => `<span class="attr">${attr.trait_type}: ${attr.value}</span>`).join('');
-            const moreCount = punk.attributes.length > 4 ? ` +${punk.attributes.length-4} more` : '';
+        function createAttributeRow(traitType = '', value = '') {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'attribute-item';
+            rowDiv.setAttribute('data-attr-id', `attr_${attributeCounter++}`);
             
-            card.innerHTML = `
-                <div class="punk-img">
-                    <img src="${punk.image}" alt="${punk.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/200?text=Punk+${punk.id}'">
-                </div>
-                <div class="punk-id">
-                    <span>🔢 #${punk.id}</span>
-                    <span class="badge">${punk.attributes.find(a=>a.trait_type==='Type')?.value || 'Punk'}</span>
-                </div>
-                <div class="meta-row">
-                    ${attrHtml}
-                    <span class="attr">${moreCount}</span>
-                </div>
-                <button class="download-btn" data-id="${punk.id}">📎 মেটাডাটা ডাউনলোড (JSON)</button>
-            `;
-            grid.appendChild(card);
-        });
-        
-        // attach download events
-        document.querySelectorAll('.download-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const punkId = parseInt(btn.getAttribute('data-id'));
-                const punkMeta = allPunksMetadata.find(p => p.id === punkId);
-                if (punkMeta) {
-                    downloadSingleMetadata(punkMeta);
-                } else {
-                    alert("মেটাডাটা পাওয়া যায়নি!");
-                }
-            });
-        });
-        
-        // card ক্লিক করে বিস্তারিত দেখানো (alert এ দেখানো যায় কিন্তু ভালো experience)
-        document.querySelectorAll('.card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                if(e.target.classList.contains('download-btn')) return;
-                const idSpan = card.querySelector('.punk-id span:first-child')?.innerText;
-                const idNum = parseInt(idSpan?.replace('#',''));
-                const found = allPunksMetadata.find(p => p.id === idNum);
-                if(found){
-                    const attrStr = found.attributes.map(a=>`${a.trait_type}: ${a.value}`).join('\n');
-                    alert(`📋 ${found.name}\n\n🔹 মেটাডাটা:\n${attrStr}\n\n🔗 ইমেজ: ${found.image}`);
-                }
-            });
-        });
-    }
-    
-    // ডাউনলোড ফাংশন single
-    function downloadSingleMetadata(metadata) {
-        const dataStr = JSON.stringify(metadata, null, 2);
-        const blob = new Blob([dataStr], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `cryptopunk_${metadata.id}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-    
-    // সমস্ত মেটাডাটা ডাউনলোড (সিরিয়াল অনুসারে all-in-one)
-    function downloadFullMetadata() {
-        const fullData = allPunksMetadata.map(p => ({
-            id: p.id,
-            name: p.name,
-            description: p.description,
-            image: p.image,
-            attributes: p.attributes,
-            external_url: p.external_url
-        }));
-        const dataStr = JSON.stringify(fullData, null, 2);
-        const blob = new Blob([dataStr], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `cryptopunks_all_metadata_0_to_9999.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-    
-    // সিরিয়াল অনুযায়ী ফিল্টার / সার্চ
-    function filterBySerial(serialNum) {
-        if (serialNum === null || isNaN(serialNum) || serialNum < 0 || serialNum > TOTAL_PUNKS-1) {
-            renderPunks(allPunksMetadata);
-            return false;
-        } else {
-            const filtered = allPunksMetadata.filter(p => p.id === serialNum);
-            renderPunks(filtered);
-            return true;
+            const typeInput = document.createElement('input');
+            typeInput.type = 'text';
+            typeInput.placeholder = 'Trait Type (e.g., "Rarity", "Color")';
+            typeInput.value = traitType;
+            typeInput.classList.add('attr-type');
+            
+            const valueInput = document.createElement('input');
+            valueInput.type = 'text';
+            valueInput.placeholder = 'Value (e.g., "Legendary", "Gold")';
+            valueInput.value = value;
+            valueInput.classList.add('attr-value');
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = '✖ Remove';
+            removeBtn.className = 'remove-attr-btn';
+            removeBtn.onclick = () => rowDiv.remove();
+            
+            rowDiv.appendChild(typeInput);
+            rowDiv.appendChild(valueInput);
+            rowDiv.appendChild(removeBtn);
+            return rowDiv;
         }
-    }
-    
-    // UI components setup
-    window.onload = () => {
-        buildFullCollection();
+
+        // Load default 2 attributes example
+        function initDefaultAttributes() {
+            attributesContainer.innerHTML = '';
+            attributeCounter = 0;
+            const attr1 = createAttributeRow('Rarity', 'Legendary');
+            const attr2 = createAttributeRow('Element', 'Fire');
+            attributesContainer.appendChild(attr1);
+            attributesContainer.appendChild(attr2);
+        }
+
+        addAttributeBtn.addEventListener('click', () => {
+            const newAttr = createAttributeRow('', '');
+            attributesContainer.appendChild(newAttr);
+        });
+
+        // Get current attributes array from UI
+        function getCurrentAttributes() {
+            const attributes = [];
+            const rows = attributesContainer.querySelectorAll('.attribute-item');
+            rows.forEach(row => {
+                const typeInput = row.querySelector('.attr-type');
+                const valueInput = row.querySelector('.attr-value');
+                const traitType = typeInput ? typeInput.value.trim() : '';
+                const traitValue = valueInput ? valueInput.value.trim() : '';
+                if(traitType !== '' || traitValue !== '') {
+                    attributes.push({
+                        trait_type: traitType || 'unknown',
+                        value: traitValue || 'unknown'
+                    });
+                }
+            });
+            return attributes;
+        }
+
+        // Build current NFT JSON object
+        function getCurrentNFTJSON() {
+            const name = nftNameInput.value.trim() || "Unnamed NFT";
+            const description = nftDescInput.value.trim() || "No description";
+            const image = imageUrlInput.value.trim() || "https://example.com/default.png";
+            const attributes = getCurrentAttributes();
+            
+            return {
+                name: name,
+                description: description,
+                image: image,
+                attributes: attributes
+            };
+        }
+
+        // Update Preview
+        function updatePreview() {
+            const nftData = getCurrentNFTJSON();
+            jsonPreviewDiv.textContent = JSON.stringify(nftData, null, 2);
+        }
+
+        // Event listeners for live preview
+        nftNameInput.addEventListener('input', updatePreview);
+        nftDescInput.addEventListener('input', updatePreview);
+        imageUrlInput.addEventListener('input', updatePreview);
         
-        const searchBtn = document.getElementById("searchBtn");
-        const resetBtn = document.getElementById("resetBtn");
-        const serialInput = document.getElementById("serialInput");
-        const downloadAllBtn = document.querySelector(".download-all");
-        
-        searchBtn.addEventListener("click", () => {
-            let val = parseInt(serialInput.value);
-            if (isNaN(val)) {
-                renderPunks(allPunksMetadata);
+        // Delegate for attribute changes
+        attributesContainer.addEventListener('input', updatePreview);
+        attributesContainer.addEventListener('change', updatePreview);
+
+        // Single JSON Download
+        function downloadSingleJSON() {
+            const nftData = getCurrentNFTJSON();
+            const safeName = nftData.name.replace(/[^a-z0-9]/gi, '_').substring(0, 50);
+            const filename = `${safeName}_nft.json`;
+            const jsonStr = JSON.stringify(nftData, null, 2);
+            const blob = new Blob([jsonStr], {type: "application/json"});
+            saveAs(blob, filename);
+        }
+
+        singleDownloadBtn.addEventListener('click', downloadSingleJSON);
+
+        // Reset Form to default
+        function resetForm() {
+            nftNameInput.value = "Galactic Phoenix";
+            nftDescInput.value = "A rare cosmic creature from the Andromeda galaxy, radiating mystical energy.";
+            imageUrlInput.value = "QmXk8kZ1nRcqN9rQV4z8bBzfLwX5G6f3jYpF6hRk9aGtL";
+            initDefaultAttributes();
+            updatePreview();
+        }
+        resetFormBtn.addEventListener('click', resetForm);
+
+        // Batch Generation: creates 'count' unique NFT objects
+        function generateBatchNFTs(count) {
+            const baseName = nftNameInput.value.trim() || "NFT";
+            const baseDesc = nftDescInput.value.trim() || "Awesome NFT";
+            const baseImage = imageUrlInput.value.trim() || "QmDefaultCID";
+            const baseAttributes = getCurrentAttributes(); // template attributes
+            
+            const batch = [];
+            
+            for(let i = 1; i <= count; i++) {
+                // Create variations for each NFT
+                const uniqueName = `${baseName} #${i}`;
+                const uniqueDesc = `${baseDesc} [Edition ${i}] — Unique metadata for NFT ${i}`;
+                const uniqueImage = `${baseImage}_${i}`;
+                
+                // Create dynamic attributes: add edition trait and optionally shift values
+                const dynamicAttrs = [];
+                // copy base attributes but modify values slightly for variation
+                for(let attr of baseAttributes) {
+                    let newValue = attr.value;
+                    if(attr.trait_type.toLowerCase().includes('edition') === false) {
+                        if(i % 3 === 0) newValue = attr.value + `+${i}`;
+                        else if(i % 5 === 0) newValue = attr.value + `⭐`;
+                        else newValue = attr.value;
+                    }
+                    dynamicAttrs.push({
+                        trait_type: attr.trait_type,
+                        value: newValue
+                    });
+                }
+                // Add an edition trait for clear distinction
+                dynamicAttrs.push({
+                    trait_type: "Edition",
+                    value: `#${i}`
+                });
+                
+                const nftObject = {
+                    name: uniqueName,
+                    description: uniqueDesc,
+                    image: uniqueImage,
+                    attributes: dynamicAttrs
+                };
+                
+                const filename = `nft_${String(i).padStart(4, '0')}_${uniqueName.replace(/[^a-z0-9]/gi, '_').substring(0, 30)}.json`;
+                batch.push({
+                    filename: filename,
+                    jsonObject: nftObject
+                });
+            }
+            return batch;
+        }
+
+        // Render batch file list in UI
+        function renderBatchFileList() {
+            if(generatedFiles.length === 0) {
+                batchFileListDiv.innerHTML = '<div style="color:#a78bfa; text-align:center; padding:1rem;">✨ No files. Use "Generate Batch" to create NFTs.</div>';
                 return;
             }
-            filterBySerial(val);
+            let html = '';
+            generatedFiles.forEach((file, idx) => {
+                const shortName = file.filename.length > 40 ? file.filename.slice(0, 37) + '...' : file.filename;
+                html += `
+                    <div class="file-item">
+                        <span>📄 ${shortName}</span>
+                        <button class="btn" style="background:#4c1d95; padding:0.2rem 0.8rem; font-size:0.7rem; color:white;" data-idx="${idx}" data-single-batch-download>Download</button>
+                    </div>
+                `;
+            });
+            batchFileListDiv.innerHTML = html;
+            
+            // Add download listeners to each single batch file button
+            document.querySelectorAll('[data-single-batch-download]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = parseInt(btn.getAttribute('data-idx'));
+                    if(!isNaN(idx) && generatedFiles[idx]) {
+                        const file = generatedFiles[idx];
+                        const jsonStr = JSON.stringify(file.jsonObject, null, 2);
+                        const blob = new Blob([jsonStr], {type: "application/json"});
+                        saveAs(blob, file.filename);
+                    }
+                });
+            });
+        }
+
+        // Generate batch
+        generateBatchBtn.addEventListener('click', () => {
+            let count = parseInt(batchCountInput.value);
+            if(isNaN(count) || count < 1) count = 1;
+            if(count > 500) count = 500;
+            batchCountInput.value = count;
+            
+            const newBatch = generateBatchNFTs(count);
+            generatedFiles = [...newBatch]; // replace previous list
+            renderBatchFileList();
+            
+            // Toast notification
+            const toast = document.createElement('div');
+            toast.innerText = `✅ ${generatedFiles.length} NFT JSON files generated!`;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '25px';
+            toast.style.right = '25px';
+            toast.style.background = '#10b981';
+            toast.style.color = 'white';
+            toast.style.padding = '12px 24px';
+            toast.style.borderRadius = '40px';
+            toast.style.fontWeight = 'bold';
+            toast.style.zIndex = '1000';
+            toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
         });
-        
-        resetBtn.addEventListener("click", () => {
-            serialInput.value = '';
-            renderPunks(allPunksMetadata);
+
+        // Clear list
+        clearBatchListBtn.addEventListener('click', () => {
+            generatedFiles = [];
+            renderBatchFileList();
         });
-        
-        downloadAllBtn.addEventListener("click", () => {
-            if(allPunksMetadata.length === TOTAL_PUNKS){
-                downloadFullMetadata();
-            } else {
-                alert("মেটাডাটা জেনারেট হচ্ছে, একটু অপেক্ষা করুন...");
+
+        // Download all as ZIP
+        downloadAllZipBtn.addEventListener('click', async () => {
+            if(generatedFiles.length === 0) {
+                alert("No batch files generated! Please click 'Generate Batch' first.");
+                return;
             }
-        });
-        
-        // এন্টার কী সাপোর্ট
-        serialInput.addEventListener("keypress", (e) => {
-            if(e.key === 'Enter') {
-                searchBtn.click();
+            const zip = new JSZip();
+            for(const file of generatedFiles) {
+                const jsonContent = JSON.stringify(file.jsonObject, null, 2);
+                zip.file(file.filename, jsonContent);
             }
+            const zipBlob = await zip.generateAsync({type: "blob"});
+            saveAs(zipBlob, `nft_batch_${new Date().toISOString().slice(0,19)}.zip`);
         });
-    };
+
+        // Initialize
+        initDefaultAttributes();
+        updatePreview();
+    })();
 </script>
 </body>
 </html>
