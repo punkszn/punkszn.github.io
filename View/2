@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dynamic NFT Viewer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#0f172a;
+  font-family:Arial;
+}
+
+/* NFT Container 512x512 */
+.nft-box{
+  width:512px;
+  height:512px;
+  position:relative;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 0 25px rgba(0,0,0,0.5);
+}
+
+/* NFT Image */
+.nft-box img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:0.4s ease;
+}
+
+/* Overlay Buttons */
+.buttons{
+  position:absolute;
+  top:10px;
+  right:10px;
+  display:flex;
+  gap:10px;
+}
+
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  background:rgba(255,255,255,0.2);
+  color:white;
+  backdrop-filter:blur(8px);
+  transition:0.3s;
+}
+
+button:hover{
+  background:rgba(255,255,255,0.4);
+  transform:scale(1.05);
+}
+
+/* Active button */
+button.active{
+  background:#38bdf8;
+  color:black;
+}
+
+/* Mobile responsive */
+@media(max-width:600px){
+  .nft-box{
+    width:90vw;
+    height:90vw;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="nft-box">
+  <img id="nftImage" src="https://raw.githubusercontent.com/mypunks/mypunks.github.io/main/org/2.png">
+
+  <div class="buttons">
+    <button class="active" onclick="changeImage(1)">ORG</button>
+    <button onclick="changeImage(2)">HL</button>
+  </div>
+</div>
+
+<script>
+const img1 = "https://raw.githubusercontent.com/mypunks/mypunks.github.io/main/org/2.png";
+const img2 = "https://raw.githubusercontent.com/mypunks/mypunks.github.io/main/hl/2.gif";
+
+const nftImage = document.getElementById("nftImage");
+const buttons = document.querySelectorAll("button");
+
+function changeImage(num){
+  if(num === 1){
+    nftImage.src = img1;
+  } else {
+    nftImage.src = img2;
+  }
+
+  buttons.forEach(b => b.classList.remove("active"));
+  buttons[num-1].classList.add("active");
+}
+</script>
+
+</body>
+</html>
