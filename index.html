@@ -1,150 +1,109 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NFT Viewer</title>
+<meta charset="UTF-8">
+<title>Dynamic NFT Viewer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#0f172a;
+  font-family:Arial;
+}
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap"
-    rel="stylesheet"
-  />
+/* NFT Container 512x512 */
+.nft-box{
+  width:512px;
+  height:512px;
+  position:relative;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 0 25px rgba(0,0,0,0.5);
+}
 
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-    }
+/* NFT Image */
+.nft-box img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:0.4s ease;
+}
 
-    body {
-      font-family: 'Outfit', sans-serif;
-      background: #030712;
-    }
+/* Overlay Buttons */
+.buttons{
+  position:absolute;
+  top:10px;
+  right:10px;
+  display:flex;
+  gap:10px;
+}
 
-    .nft-frame img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      image-rendering: pixelated;
-      transition: opacity 0.4s ease;
-    }
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  background:rgba(255,255,255,0.2);
+  color:white;
+  backdrop-filter:blur(8px);
+  transition:0.3s;
+}
 
-    .btn-active {
-      background-color: #111827 !important;
-      color: #ffffff !important;
-      border: 1.5px solid rgba(59, 130, 246, 0.6);
-      box-shadow:
-        0 0 25px rgba(59, 130, 246, 0.7),
-        inset 0 0 15px rgba(59, 130, 246, 0.3);
-    }
-  </style>
+button:hover{
+  background:rgba(255,255,255,0.4);
+  transform:scale(1.05);
+}
+
+/* Active button */
+button.active{
+  background:#38bdf8;
+  color:black;
+}
+
+/* Mobile responsive */
+@media(max-width:600px){
+  .nft-box{
+    width:90vw;
+    height:90vw;
+  }
+}
+</style>
 </head>
 
-<body class="h-full flex flex-col items-center justify-center overflow-auto">
+<body>
 
-  <div class="flex flex-col items-center gap-8 p-6">
+<div class="nft-box">
+  <img id="nftImage" src="https://raw.githubusercontent.com/mypunks/mypunks.github.io/main/org/1.png">
 
-    <!-- NFT Frame -->
-    <div
-      class="nft-frame relative w-[512px] h-[512px] max-w-[90vw] max-h-[90vw] rounded-2xl overflow-hidden border-2 border-gray-700 shadow-2xl bg-gray-900"
-    >
-      <img
-        id="nftImage"
-        src=""
-        alt="NFT Artwork"
-        class="opacity-0"
-      />
-    </div>
-
-    <!-- Buttons -->
-    <div class="flex gap-6">
-      <button
-        id="btnOrg"
-        onclick="switchView('org')"
-        class="px-8 py-3 rounded-xl font-semibold text-base transition-all duration-300 bg-gray-700 text-white hover:bg-gray-600"
-      >
-        Original
-      </button>
-
-      <button
-        id="btnHl"
-        onclick="switchView('hl')"
-        class="px-8 py-3 rounded-xl font-semibold text-base transition-all duration-300 bg-gray-700 text-white hover:bg-gray-600"
-      >
-        Holographic
-      </button>
-    </div>
-
+  <div class="buttons">
+    <button class="active" onclick="changeImage(1)">HL</button>
+    <button onclick="changeImage(2)">ORG</button>
   </div>
+</div>
 
-  <script>
-    /*
-      GitHub repo structure:
+<script>
+const img1 = "https://raw.githubusercontent.com/mypunks/mypunks.github.io/main/org/1.png";
+const img2 = "https://raw.githubusercontent.com/mypunks/mypunks.github.io/main/hl/1.gif";
 
-      nftvier.github.io/
-      ├── viewer.html
-      ├── org/
-      │   ├── 1.png
-      │   ├── 2.png
-      │   └── ...
-      └── hl/
-          ├── 1.gif
-          ├── 2.gif
-          └── ...
-    */
+const nftImage = document.getElementById("nftImage");
+const buttons = document.querySelectorAll("button");
 
-    // IMPORTANT:
-    // Use repository root URL only (NOT a file URL)
-    const BASE = "https://raw.githubusercontent.com/mypunks/mypunks.github.io/main";
+function changeImage(num){
+  if(num === 1){
+    nftImage.src = img1;
+  } else {
+    nftImage.src = img2;
+  }
 
-    // Read token ID from URL:
-    // index.html.html?id=1
-    const params = new URLSearchParams(window.location.search);
-    const tokenId = params.get("id") || "1";
-
-    const nftImage = document.getElementById("nftImage");
-    const btnOrg = document.getElementById("btnOrg");
-    const btnHl = document.getElementById("btnHl");
-
-    let currentView = "org";
-
-    function switchView(view) {
-      currentView = view;
-
-      // Fade out
-      nftImage.style.opacity = "0";
-
-      setTimeout(() => {
-        if (view === "org") {
-          nftImage.src = `${BASE}/org/${tokenId}.png`;
-        } else {
-          nftImage.src = `${BASE}/hl/${tokenId}.gif`;
-        }
-
-        nftImage.onload = () => {
-          nftImage.style.opacity = "1";
-        };
-
-        nftImage.onerror = () => {
-          console.error("File not found:", nftImage.src);
-        };
-      }, 200);
-
-      updateButtons();
-    }
-
-    function updateButtons() {
-      btnOrg.classList.toggle("btn-active", currentView === "org");
-      btnHl.classList.toggle("btn-active", currentView === "hl");
-    }
-
-    // Load default view
-    switchView("org");
-  </script>
+  buttons.forEach(b => b.classList.remove("active"));
+  buttons[num-1].classList.add("active");
+}
+</script>
 
 </body>
 </html>
